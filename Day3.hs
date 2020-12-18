@@ -2,27 +2,19 @@ module Day3 where
 
 import Data.List (transpose)
 
-load :: IO [String]
-load = lines <$> readFile "input3.txt"
+load :: FilePath -> IO [String]
+load = (lines <$>) . readFile
 
-testmap = [ "..##......." 
-          , "#...#...#.." 
-          , ".#....#..#." 
-          , "..#.#...#.#" 
-          , ".#...##..#." 
-          , "..#.##....." 
-          , ".#.#.#....#" 
-          , ".#........#" 
-          , "#.##...#..." 
-          , "#...##....#" 
-          , ".#..#...#.#"
-          ]
-
---route slope m = zipWith (!!) (map cycle m) (iterate (slope +) 0)
-route s m = route' s (map cycle m) where
-    route' _ [] = []
-    route' (p,q) m = head (head m) : (route (p,q) . map (drop p) . drop q $ m)
+route :: (Int, Int) -> [[a]] -> [a]
+route (p,q) m = route' (map cycle m) where
+    route' [] = []
+    route' m = head (head m) : (route' . map (drop p) . drop q $ m)
 
 hits = length . filter (== '#')
 
-allslopes m = product [ hits (route s m) | s <- [(1,1), (3,1), (5,1), (7,1), (1,2)]] 
+slopes = [(1,1), (3,1), (5,1), (7,1), (1,2)]
+
+main = do
+    m <- load "input3.txt"
+    print . hits . route (3,1) $ m
+    print . product $ [ hits (route s m) | s <- slopes ]
